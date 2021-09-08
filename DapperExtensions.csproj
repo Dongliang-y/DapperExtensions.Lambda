@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
-    <PackageId>DapperExtensions</PackageId>
+    <PackageId>DapperExtensions-y</PackageId>
     <Description>2021-1-3 V3.0.0.17 修复分页关键字处理的一个BUG
 2020-12-17 V3.0.0.16  ID自动生成，只补全ID
 2020-9-24 V3.0.0.15 sql输出改成console输出
