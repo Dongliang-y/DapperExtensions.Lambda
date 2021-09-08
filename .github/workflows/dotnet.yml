@@ -18,7 +18,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.100
+        dotnet-version: 5.0.100
     # 3.build
     - name: Build with dotnet
       run: dotnet build --configuration Release
@@ -31,4 +31,4 @@ jobs:
     # 5. Push  package
     - name: Push generated package to GitHub registry
       run: |
-        .\nuget push .\DapperExtensions-y\bin\Release\*.nupkg -Source https://api.nuget.org/v3/index.json -SkipDuplicate -ApiKey ${{ secrets.NugetKey }} -NoSymbols
+        .\nuget push .\bin\Release\*.nupkg -Source https://api.nuget.org/v3/index.json -SkipDuplicate -ApiKey ${{ secrets.NugetKey }} -NoSymbols
