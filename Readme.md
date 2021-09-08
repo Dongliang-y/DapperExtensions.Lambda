@@ -4,7 +4,7 @@
 ### 分支修改：Dongliang Yi
 ### 基本说明：
 
-DapperExtensions zjjw分支，做了大量定制化开发。
+DapperExtensions zjjw分支，做了大量定制化开发,主要是为了更好的支持 拉姆达表达式，以及对.NET CORE 5的支持
 
 ### 更新记录：
 ```
