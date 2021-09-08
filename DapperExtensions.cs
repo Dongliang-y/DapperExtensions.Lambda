@@ -131,18 +131,6 @@ namespace DapperExtensions
             Configure(new DapperExtensionsConfiguration(defaultMapper, mappingAssemblies, sqlDialect));
         }
 
-        /// <summary>
-        /// 把 表达式转cheng sql。
-        /// </summary>
-        public static string SerializedLambda(this IDbConnection connection,IClassMapper mapper, object predicate)
-        {
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
-            var sqlPredicate = Instance.GetPredicate(mapper, predicate);
-
-            var sql= sqlPredicate.GetSql(Instance.SqlGenerator, parameters);
-            sql += ZJJWEPlatform.Infrastructure.SerializerHelper.ToJson(parameters);
-            return sql;
-        }
 
         /// <summary>
         /// Executes a query for the specified id, returning the data typed as per T

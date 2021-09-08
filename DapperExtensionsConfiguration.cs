@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using DapperExtensions.IdGenerators;
 using DapperExtensions.Mapper;
 using DapperExtensions.Sql;
 using Snowflake.Core;
@@ -72,16 +73,7 @@ namespace DapperExtensions
 
         public string GetNextID()
         {
-            return ZJJWEPlatform.IdGenerators.SnowflakeHelper.GenerateId().ToString();
-
-
-            //var guid=GuidGeneratorDE.Instance.GenerateId();
-            //Guid guidRst;
-            //if (!Guid.TryParse(guid.ToString(), out guidRst))
-            //{
-            //    return Guid.Parse(guid.ToString());
-            //}
-            //else return guidRst;
+            return SnowflakeIDGenerator.GenerateId().ToString();
         }
 
         protected virtual Type GetMapType(Type entityType)

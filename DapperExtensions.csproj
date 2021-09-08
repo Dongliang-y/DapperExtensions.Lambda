@@ -15,8 +15,10 @@
     <SignAssembly>false</SignAssembly>
     <FileVersion>3.0.0.18</FileVersion>
     <Version>3.0.0.18</Version>
-    <PackageReleaseNotes></PackageReleaseNotes>
-    <RepositoryUrl>http://192.168.1.210:999/nuget</RepositoryUrl>
+    <PackageReleaseNotes>基于DapperExtensions 做了大量定制化开发,主要是为了更好的支持 拉姆达表达式，以及对.NET CORE 5的支持</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/Dongliang-y/DapperExtensions-y.git</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/Dongliang-y/DapperExtensions-y</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
 
@@ -44,12 +46,12 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.4" />
+    <PackageReference Include="MongoDB.Bson" Version="2.13.1" />
     <PackageReference Include="Snowflake.Core" Version="2.0.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="ZJJWEPlatform.Infrastructure" Version="5.0.2.3" />
   </ItemGroup>
 
   <ItemGroup>

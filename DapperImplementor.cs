@@ -6,9 +6,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Dapper;
+using DapperExtensions.IdGenerators;
 using DapperExtensions.Mapper;
 using DapperExtensions.Sql;
-using ZJJWEPlatform.Infrastructure.Loger;
 
 namespace DapperExtensions
 {
@@ -83,7 +83,7 @@ namespace DapperExtensions
                     object colVal = column.PropertyInfo.GetValue(e, null);
                     if (column.KeyType == KeyType.Guid && (Guid)colVal == Guid.Empty)
                     {
-                        Guid comb = Guid.Parse(ZJJWEPlatform.IdGenerators.AscendingGuidGenerator.Instance.GenerateId().ToString());
+                         Guid comb = Guid.Parse(ObjectIdGenerator.Instance.GenerateId().ToString());
                         parameters.Add($"{SqlGenerator.Configuration.Dialect.ParameterPrefix}{column.Name}_{i}", comb);
 
                     }
@@ -116,7 +116,7 @@ namespace DapperExtensions
                 object colVal = column.PropertyInfo.GetValue(entity, null);
                 if (column.KeyType == KeyType.Guid && (Guid)colVal == Guid.Empty)
                 {
-                    Guid comb = Guid.Parse(ZJJWEPlatform.IdGenerators.AscendingGuidGenerator.Instance.GenerateId().ToString());
+                    Guid comb = Guid.Parse(ObjectIdGenerator.Instance.GenerateId().ToString());
                     column.PropertyInfo.SetValue(entity, comb, null);
                 }
                 else if (column.Name.ToLower() == "id" && string.IsNullOrEmpty((string)colVal))
