@@ -1,32 +1,34 @@
-### ��Ʒ���ƣ�DapperExtensions zjjw��֧
-### ��˾��
-### ���ߣ�Thad Smith, Page Brooks
-### ��֧�޸ģ�Dongliang Yi
-### ����˵����
+### 产品名称：DapperExtensions zjjw分支
+### 公司：
+### 作者：Thad Smith, Page Brooks
+### 分支修改：Dongliang Yi
+### 基本说明：
 
-DapperExtensions zjjw��֧�����˴������ƻ�������
+DapperExtensions zjjw分支，做了大量定制化开发。
 
-### ���¼�¼��
+### 更新记录：
 ```
-2021-1-3 V3.0.0.17 �޸���ҳ�ؼ��ִ�����һ��BUG
-2020-12-17 V3.0.0.16  ID�Զ����ɣ�ֻ��ȫID
-2020-9-24 V3.0.0.15 sql����ĳ�console���
-2020-9-24 V3.0.0.13 ��ҳBUG�޸���
-2020-9-24 V3.0.0.12 �ӿڶ���������
-2020-9-24 V3.0.0.9 �����Զ���������ѯ���ݡ�
+2021-1-3 V3.0.0.17 修复分页关键字处理的一个BUG
+2020-12-17 V3.0.0.16  ID自动生成，只补全ID
+2020-9-24 V3.0.0.15 sql输出改成console输出
+2020-9-24 V3.0.0.13 分页BUG修复。
+2020-9-24 V3.0.0.12 接口二义性问题
+2020-9-24 V3.0.0.9 增加自定义列名查询数据。
 2020-9-21 v3.0.0.8
-���� max��min��sum��avg ��ѧ������
+增加 max、min、sum、avg 数学函数。
 2020-9-19 v3.0.0.6
-���Ӱ� ����ʽתcheng sql����չ������
-������������ʱsql����������ʾ��
+增加把 表达式转cheng sql的扩展方法。
+添加批量新增时sql超长风险提示。
 2020-7-19:
-�޸�һ��ID���ɵ�BUG
+修复一个ID生成的BUG
 2020-7-17:
-��д����������ʹ��һ��sql���������ֵ�÷�ʽ��mysql֧��addOrUpdate
+重写批量新增，使用一条sql，多个新增值得方式。mysql支持addOrUpdate
 2020-7-10 : 
-�Ż���ҳ��ѯ������.net core 3.1
+优化分页查询，升级.net core 3.1
 2020-4-29
-ԭ���ߣ�Thad Smith, Page Brooks
-�ع��˶�Contains��֧�֡� ����ģʽ�½���ʾ�������⣬�����и����Ż���
+原作者：Thad Smith, Page Brooks
+回滚了对Contains的支持。 调试模式下将提示性能问题，请自行负责优化。
 2020-06-02
-������ID�����࣬����͵ײ�ĳ�ͻ��
+重命名ID生成类，避免和底层的冲突。
+
+2019-7-XX： 主要扩展了对拉姆达表达式解析的支持
