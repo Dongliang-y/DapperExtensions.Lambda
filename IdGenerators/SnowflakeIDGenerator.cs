@@ -14,7 +14,7 @@ namespace DapperExtensions.IdGenerators
     /// </summary>
     public class SnowflakeIDGenerator
     {
-        private static readonly Snowflake.Core.IdWorker Snow = new Snowflake.Core.IdWorker(GetMachineHash(),GetCurrentProcessId());
+        private static readonly Snowflake.Core.IdWorker Snow = new Snowflake.Core.IdWorker(GetMachineHash()%31,GetCurrentProcessId());
 
         public static long GenerateId()
         {

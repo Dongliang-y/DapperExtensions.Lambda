@@ -5,6 +5,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Dapper;
 using DapperExtensions.IdGenerators;
 using DapperExtensions.Mapper;
@@ -282,6 +283,21 @@ namespace DapperExtensions
             return (int)connection.Query(sql, dynamicParameters, transaction, false, commandTimeout, CommandType.Text).Single().TOTAL;
         }
 
+        public async Task<int> CountAsync<T>(IDbConnection connection, object predicate, IDbTransaction transaction, int? commandTimeout) where T : class
+        {
+            IClassMapper classMap = SqlGenerator.Configuration.GetMap<T>();
+            IPredicate wherePredicate = GetPredicate(classMap, predicate);
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            string sql = SqlGenerator.Count(classMap, wherePredicate, parameters);
+            DynamicParameters dynamicParameters = new DynamicParameters();
+            foreach (var parameter in parameters)
+            {
+                dynamicParameters.Add(parameter.Key, parameter.Value);
+            }
+
+            var rst=  await connection.QueryAsync(sql:sql,param:dynamicParameters, transaction, commandTimeout, CommandType.Text);
+            return rst.Single().TOTAL;
+        }
 
         public Tvalue Max<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class
         {
@@ -407,6 +423,30 @@ namespace DapperExtensions
             {
                 var total = this.Count<T>(connection, predicate, transaction, commandTimeout);
                 var datas = connection.Query<T>(sql, dynamicParameters, transaction, buffered, commandTimeout, CommandType.Text);
+                return (datas, total);
+            }
+        }
+        protected async Task<(IEnumerable<T>, long)> GetPageAsync<T>(IDbConnection connection, IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered) where T : class
+        {
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            string sql = SqlGenerator.SelectPaged(classMap, predicate, sort, page, resultsPerPage, parameters);
+            DynamicParameters dynamicParameters = new DynamicParameters();
+            foreach (var parameter in parameters)
+            {
+                dynamicParameters.Add(parameter.Key, parameter.Value);
+            }
+            if (SqlGenerator.SupportsMultipleStatements())
+            {
+                var resultData = await connection.QueryMultipleAsync(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text);
+
+                var datas = await resultData.ReadAsync<T>();
+                var total = await resultData.ReadAsync<long>();
+                return (datas, total.FirstOrDefault());
+            }
+            else
+            {
+                var total = await this.CountAsync<T>(connection, predicate, transaction, commandTimeout);
+                var datas = await connection.QueryAsync<T>(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text);
                 return (datas, total);
             }
         }
