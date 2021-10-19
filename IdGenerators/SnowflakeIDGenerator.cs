@@ -14,7 +14,7 @@ namespace DapperExtensions.IdGenerators
     /// </summary>
     public class SnowflakeIDGenerator
     {
-        private static readonly Snowflake.Core.IdWorker Snow = new Snowflake.Core.IdWorker(GetMachineHash()%31,GetCurrentProcessId());
+        private static readonly Snowflake.Core.IdWorker Snow = new Snowflake.Core.IdWorker(GetMachineHash(),GetCurrentProcessId());
 
         public static long GenerateId()
         {
@@ -32,7 +32,7 @@ namespace DapperExtensions.IdGenerators
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static int GetCurrentProcessId()
         {
-            return Process.GetCurrentProcess().Id;
+            return Math.Abs( Process.GetCurrentProcess().Id%31);
         }
 
         private static long GetMachineHash()
@@ -42,7 +42,8 @@ namespace DapperExtensions.IdGenerators
             var sha1 = SHA1.Create();
             var rstBytes = sha1.ComputeHash(Encoding.UTF8.GetBytes(machineName));
             var longMachiID = BitConverter.ToInt64(rstBytes, 0);
-            return longMachiID;
+            var workid= Math.Abs(longMachiID)%31;
+            return workid;
         }
 
         private static string GetMachineName()
