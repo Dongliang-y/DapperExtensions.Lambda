@@ -211,11 +211,18 @@ namespace DapperExtensions
         /// Executes a select query using the specified predicate, returning an IEnumerable data typed as per T.
         /// Data returned is dependent upon the specified page and resultsPerPage.
         /// </summary>
-        public async static Task<(IEnumerable<T>, long)> GetPageAsync<T>(this IDbConnection connection, object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class
+        public async static Task<(IEnumerable<T>, long)> GetPageAsync<T>(this IDbConnection connection, object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction = null, int? commandTimeout = null) where T : class
         {
             return await Instance.GetPageAsync<T>(connection, predicate, sort, page, resultsPerPage, transaction, commandTimeout);
         }
-
+        /// <summary>
+        /// Executes a select query using the specified predicate, returning an IEnumerable data typed as per T.
+        /// Data returned is dependent upon the specified page and resultsPerPage.
+        /// </summary>
+        public static (IEnumerable<T>, long) GetPage<T>(this IDbConnection connection, object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction = null, int? commandTimeout = null, bool buffered = false) where T : class
+        {
+            return Instance.GetPage<T>(connection, predicate, sort, page, resultsPerPage, transaction, commandTimeout, buffered);
+        }
         /// <summary>
         /// Executes a select query using the specified predicate, returning an IEnumerable data typed as per T.
         /// Data returned is dependent upon the specified firstResult and maxResults.

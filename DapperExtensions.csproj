@@ -14,10 +14,10 @@
     <Company></Company>
     <Authors>Dongliang yi</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>3.0.0.22</AssemblyVersion>
+    <AssemblyVersion>3.0.0.23</AssemblyVersion>
     <SignAssembly>false</SignAssembly>
-    <FileVersion>3.0.0.22</FileVersion>
-    <Version>3.0.0.22-alpha</Version>
+    <FileVersion>3.0.0.23</FileVersion>
+    <Version>3.0.0.23-alpha</Version>
     <PackageReleaseNotes>基于DapperExtensions 做了大量定制化开发,主要是为了更好的支持 拉姆达表达式，以及对.NET CORE 5的支持</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/Dongliang-y/DapperExtensions.Lambda.git</RepositoryUrl>
     <PackageProjectUrl>https://github.com/Dongliang-y/DapperExtensions.Lambda</PackageProjectUrl>
