@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using DapperExtensions.Mapper;
 using DapperExtensions.Sql;
 
@@ -25,10 +26,14 @@ namespace DapperExtensions
         dynamic Insert<T>(T entity, int? commandTimeout = null) where T : class;
         bool Update<T>(T entity, IDbTransaction transaction, int? commandTimeout = null, bool ignoreAllKeyProperties = false) where T : class;
         bool Update<T>(T entity, int? commandTimeout = null, bool ignoreAllKeyProperties = false) where T : class;
-        bool Delete<T>(T entity, IDbTransaction transaction, int? commandTimeout = null) where T : class;
-        bool Delete<T>(T entity, int? commandTimeout = null) where T : class;
-        bool Delete<T>(object predicate, IDbTransaction transaction, int? commandTimeout = null) where T : class;
-        bool Delete<T>(object predicate, int? commandTimeout = null) where T : class;
+        int Delete<T>(T entity, IDbTransaction transaction, int? commandTimeout = null) where T : class;
+        int Delete<T>(T entity, int? commandTimeout = null) where T : class;
+        int Delete<T>(object predicate, IDbTransaction transaction, int? commandTimeout = null) where T : class;
+        int Delete<T>(object predicate, int? commandTimeout = null) where T : class;
+        Task<IEnumerable<T>> GetListAsync<T>(object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout = null) where T : class;
+        Task<IEnumerable<T>> GetListAsync<T>(object predicate = null, IList<ISort> sort = null, int? commandTimeout = null) where T : class;
+        Task<(IEnumerable<T>, long)> GetPageAsync<T>(object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout = null) where T : class;
+        Task<(IEnumerable<T>, long)> GetPageAsync<T>(object predicate, IList<ISort> sort, int page, int resultsPerPage, int? commandTimeout = null) where T : class;
         IEnumerable<T> GetList<T>(object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout = null, bool buffered = true) where T : class;
         IEnumerable<T> GetList<T>(object predicate = null, IList<ISort> sort = null, int? commandTimeout = null, bool buffered = true) where T : class;
         (IEnumerable<T>, long) GetPage<T>(object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout = null, bool buffered = true) where T : class;
@@ -180,22 +185,22 @@ namespace DapperExtensions
             return _dapper.Update<T>(Connection, entity, _transaction, commandTimeout, ignoreAllKeyProperties);
         }
 
-        public bool Delete<T>(T entity, IDbTransaction transaction, int? commandTimeout) where T : class
+        public int Delete<T>(T entity, IDbTransaction transaction, int? commandTimeout) where T : class
         {
             return _dapper.Delete(Connection, entity, transaction, commandTimeout);
         }
 
-        public bool Delete<T>(T entity, int? commandTimeout) where T : class
+        public int Delete<T>(T entity, int? commandTimeout) where T : class
         {
             return _dapper.Delete(Connection, entity, _transaction, commandTimeout);
         }
 
-        public bool Delete<T>(object predicate, IDbTransaction transaction, int? commandTimeout) where T : class
+        public int Delete<T>(object predicate, IDbTransaction transaction, int? commandTimeout) where T : class
         {
             return _dapper.Delete<T>(Connection, predicate, transaction, commandTimeout);
         }
 
-        public bool Delete<T>(object predicate, int? commandTimeout) where T : class
+        public int Delete<T>(object predicate, int? commandTimeout) where T : class
         {
             return _dapper.Delete<T>(Connection, predicate, _transaction, commandTimeout);
         }
@@ -210,6 +215,17 @@ namespace DapperExtensions
             return _dapper.GetList<T>(Connection, predicate, sort, _transaction, commandTimeout, buffered);
         }
 
+
+
+        public async Task<IEnumerable<T>> GetListAsync<T>(object predicate, IList<ISort> sort, IDbTransaction transaction, int? commandTimeout) where T : class
+        {
+            return await _dapper.GetListAsync<T>(Connection, predicate, sort, transaction, commandTimeout);
+        }
+
+        public async Task<IEnumerable<T>> GetListAsync<T>(object predicate, IList<ISort> sort, int? commandTimeout) where T : class
+        {
+            return await _dapper.GetListAsync<T>(Connection, predicate, sort, _transaction, commandTimeout);
+        }
         public (IEnumerable<T>,long) GetPage<T>(object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout, bool buffered) where T : class
         {
             return _dapper.GetPage<T>(Connection, predicate, sort, page, resultsPerPage, transaction, commandTimeout, buffered);
@@ -220,6 +236,15 @@ namespace DapperExtensions
             return _dapper.GetPage<T>(Connection, predicate, sort, page, resultsPerPage, _transaction, commandTimeout, buffered);
         }
 
+        public async Task<(IEnumerable<T>, long)> GetPageAsync<T>(object predicate, IList<ISort> sort, int page, int resultsPerPage, IDbTransaction transaction, int? commandTimeout) where T : class
+        {
+            return await _dapper.GetPageAsync<T>(Connection, predicate, sort, page, resultsPerPage, transaction, commandTimeout);
+        }
+
+        public async Task<(IEnumerable<T>, long)> GetPageAsync<T>(object predicate, IList<ISort> sort, int page, int resultsPerPage, int? commandTimeout) where T : class
+        {
+            return await _dapper.GetPageAsync<T>(Connection, predicate, sort, page, resultsPerPage, _transaction, commandTimeout);
+        }
         public IEnumerable<T> GetSet<T>(object predicate, IList<ISort> sort, int firstResult, int maxResults, IDbTransaction transaction, int? commandTimeout, bool buffered) where T : class
         {
             return _dapper.GetSet<T>(Connection, predicate, sort, firstResult, maxResults, transaction, commandTimeout, buffered);
