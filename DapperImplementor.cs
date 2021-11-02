@@ -50,6 +50,11 @@ namespace DapperExtensions
         Tvalue Min<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class;
         Tvalue Sum<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class;
         Tvalue AVG<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class;
+
+        Task<Tvalue> MaxAsync<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class;
+        Task<Tvalue> MinAsync<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class;
+        Task<Tvalue> SumAsync<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class;
+        Task<Tvalue> AVGAsync<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class;
         #endregion
     }
 
@@ -595,6 +600,86 @@ namespace DapperExtensions
             }
             return connection.ExecuteScalar<Tvalue>(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text);
         }
+
+        public async Task<Tvalue> MaxAsync<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class
+        {
+            IClassMapper classMap = SqlGenerator.Configuration.GetMap<T>();
+
+            if (!classMap.Properties.Any(x => x.Name == attrName))
+            {
+                throw new ArgumentOutOfRangeException(nameof(attrName), $"{nameof(attrName)}属性名称不存在于{classMap.TableName}");
+            }
+
+            IPredicate wherePredicate = GetPredicate(classMap, predicate);
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            string sql = SqlGenerator.Max(classMap, attrName, wherePredicate, parameters);
+            DynamicParameters dynamicParameters = new DynamicParameters();
+            foreach (var parameter in parameters)
+            {
+                dynamicParameters.Add(parameter.Key, parameter.Value);
+            }
+            return await connection.ExecuteScalarAsync<Tvalue>(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text);
+        }
+
+        public async Task<Tvalue> MinAsync<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class
+        {
+            IClassMapper classMap = SqlGenerator.Configuration.GetMap<T>();
+
+            if (!classMap.Properties.Any(x => x.Name == attrName))
+            {
+                throw new ArgumentOutOfRangeException(nameof(attrName), $"{nameof(attrName)}属性名称不存在于{classMap.TableName}");
+            }
+
+            IPredicate wherePredicate = GetPredicate(classMap, predicate);
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            string sql = SqlGenerator.Min(classMap, attrName, wherePredicate, parameters);
+            DynamicParameters dynamicParameters = new DynamicParameters();
+            foreach (var parameter in parameters)
+            {
+                dynamicParameters.Add(parameter.Key, parameter.Value);
+            }
+            return await connection.ExecuteScalarAsync<Tvalue>(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text);
+        }
+
+        public async Task<Tvalue> SumAsync<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class
+        {
+            IClassMapper classMap = SqlGenerator.Configuration.GetMap<T>();
+            if (!classMap.Properties.Any(x => x.Name == attrName))
+            {
+                throw new ArgumentOutOfRangeException(nameof(attrName), $"{nameof(attrName)}属性名称不存在于{classMap.TableName}");
+            }
+
+            IPredicate wherePredicate = GetPredicate(classMap, predicate);
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            string sql = SqlGenerator.Sum(classMap, attrName, wherePredicate, parameters);
+            DynamicParameters dynamicParameters = new DynamicParameters();
+            foreach (var parameter in parameters)
+            {
+                dynamicParameters.Add(parameter.Key, parameter.Value);
+            }
+            var val = await connection.ExecuteScalarAsync<Tvalue>(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text);
+            return val;
+        }
+
+        public async Task<Tvalue> AVGAsync<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class
+        {
+            IClassMapper classMap = SqlGenerator.Configuration.GetMap<T>();
+
+            if (!classMap.Properties.Any(x => x.Name == attrName))
+            {
+                throw new ArgumentOutOfRangeException(nameof(attrName), $"{nameof(attrName)}属性名称不存在于{classMap.TableName}");
+            }
+
+            IPredicate wherePredicate = GetPredicate(classMap, predicate);
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            string sql = SqlGenerator.AVG(classMap, attrName, wherePredicate, parameters);
+            DynamicParameters dynamicParameters = new DynamicParameters();
+            foreach (var parameter in parameters)
+            {
+                dynamicParameters.Add(parameter.Key, parameter.Value);
+            }
+            return await connection.ExecuteScalarAsync<Tvalue>(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text);
+        }
         #endregion
 
 
@@ -685,19 +770,6 @@ namespace DapperExtensions
             }
 
             return connection.Query<T>(sql, dynamicParameters, transaction, buffered, commandTimeout, CommandType.Text);
-        }
-
-        protected async Task<IEnumerable<T>> GetSetAsync<T>(IDbConnection connection, IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int firstResult, int maxResults, IDbTransaction transaction, int? commandTimeout) where T : class
-        {
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
-            string sql = SqlGenerator.SelectSet(classMap, predicate, sort, firstResult, maxResults, parameters);
-            DynamicParameters dynamicParameters = new DynamicParameters();
-            foreach (var parameter in parameters)
-            {
-                dynamicParameters.Add(parameter.Key, parameter.Value);
-            }
-
-            return await connection.QueryAsync<T>(sql, dynamicParameters, transaction, commandTimeout, CommandType.Text);
         }
 
         protected int Delete<T>(IDbConnection connection, IClassMapper classMap, IPredicate predicate, IDbTransaction transaction, int? commandTimeout) where T : class
@@ -873,6 +945,7 @@ namespace DapperExtensions
 
             return new SequenceReaderResultReader(items);
         }
+
         #endregion
     }
 }

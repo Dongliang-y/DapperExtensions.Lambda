@@ -29,7 +29,7 @@ namespace DapperExtensions.Sql
             var rstSql= GetSetSql(sql, startValue, resultsPerPage, parameters);
             return $"{rstSql};SELECT FOUND_ROWS();";
         }
-        //SELECT * FROM table WHERE id BETWEEN 1000000 AND 1000010;  调整了分页代码 by Dongliang Yi
+
         public override string GetSetSql(string sql, int firstResult, int maxResults, IDictionary<string, object> parameters)
         {
             sql = sql.ToLower();

@@ -4,6 +4,7 @@
     <TargetFrameworks>netcoreapp3.1;net5.0</TargetFrameworks>
     <PackageId>DapperExtensions.Lambda</PackageId>
     <Description>基于DapperExtensions 做了大量定制化开发,主要是为了更好的支持 拉姆达表达式，以及对.NET CORE 5的支持
+2021-11-2 V3.0.0.24-alpha 完善异步方法
 2021-10-19 V3.0.0.20 修复未指定 workid时自动产生的 work id 超最大限制31的BUG
 2021-1-3 V3.0.0.17 修复分页关键字处理的一个BUG
 2021-1-3 V3.0.0.17 修复分页关键字处理的一个BUG
@@ -14,10 +15,10 @@
     <Company></Company>
     <Authors>Dongliang yi</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>3.0.0.23</AssemblyVersion>
+    <AssemblyVersion>3.0.0.24</AssemblyVersion>
     <SignAssembly>false</SignAssembly>
-    <FileVersion>3.0.0.23</FileVersion>
-    <Version>3.0.0.23-alpha</Version>
+    <FileVersion>3.0.0.24</FileVersion>
+    <Version>3.0.0.24-alpha</Version>
     <PackageReleaseNotes>基于DapperExtensions 做了大量定制化开发,主要是为了更好的支持 拉姆达表达式，以及对.NET CORE 5的支持</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/Dongliang-y/DapperExtensions.Lambda.git</RepositoryUrl>
     <PackageProjectUrl>https://github.com/Dongliang-y/DapperExtensions.Lambda</PackageProjectUrl>

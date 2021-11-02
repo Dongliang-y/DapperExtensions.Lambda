@@ -1,9 +1,5 @@
 ﻿/*
- * linq表达式转成DapperExtensions表达式，参考自 Dapper.Extensions.Linq ，
- * Dapper.Extensions.Linq 侵入框架太多内容，所以进行了移植
- * add by Dongliang Yi
- * time：2017/08/18
- * 
+ * linq表达式转成DapperExtensions表达式
  */
 using System;
 using System.Collections.Generic;
@@ -38,10 +34,7 @@ namespace DapperExtensions
         IPredicateGroup GetPredicate();
     }
     /// <summary>
-    /// linq表达式转成DapperExtensions表达式，参考自 Dapper.Extensions.Linq ，
-    /// Dapper.Extensions.Linq 侵入框架太多内容，所以进行了移植
-    ///  add by Dongliang Yi
-    /// time：2017/08/18
+    /// linq表达式转成DapperExtensions表达式
     /// </summary>
     public class QueryBuilder<T> : IQueryBuilder<T> where T : class
     {
