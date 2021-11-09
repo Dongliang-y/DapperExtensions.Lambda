@@ -1001,9 +1001,9 @@ namespace DapperExtensions
                 var rst = prop.GetCustomAttributes(typeof(ForeignKeyAttribute), true);
                 if (rst.Length > 0)
                 {
-#if DEBUG
                     // 外键字段
                     var foreignKey = ((ForeignKeyAttribute)rst[0]).Name;
+#if DEBUG
                     // 外键字段指向的类型
                     var dname = prop.DeclaringType.Name;
 
