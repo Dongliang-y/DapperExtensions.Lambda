@@ -98,8 +98,9 @@ namespace DapperExtensions
                         parameters.Add($"{SqlGenerator.Configuration.Dialect.ParameterPrefix}{column.Name}_{i}", comb);
 
                     }
-                    else if (column.Name.ToLower() == "id" && string.IsNullOrEmpty((string)colVal))
+                    else if (column.KeyType!= KeyType.NotAKey && string.IsNullOrEmpty((string)colVal))
                     {
+                        // 通过对象字段成员上的 [Key]特性来决定主键。
                         string comb = SqlGenerator.Configuration.GetNextID();
 
                         parameters.Add($"{SqlGenerator.Configuration.Dialect.ParameterPrefix}{column.Name}_{i}", comb);
@@ -154,7 +155,7 @@ namespace DapperExtensions
                     Guid comb = Guid.Parse(ObjectIdGenerator.Instance.GenerateId().ToString());
                     column.PropertyInfo.SetValue(entity, comb, null);
                 }
-                else if (column.Name.ToLower() == "id" && string.IsNullOrEmpty((string)colVal))
+                else if (column.KeyType != KeyType.NotAKey && string.IsNullOrEmpty((string)colVal))
                 {
                     var comb = SqlGenerator.Configuration.GetNextID();
                     column.PropertyInfo.SetValue(entity, comb, null);
@@ -250,7 +251,7 @@ namespace DapperExtensions
                     Guid comb = Guid.Parse(ObjectIdGenerator.Instance.GenerateId().ToString());
                     column.PropertyInfo.SetValue(entity, comb, null);
                 }
-                else if (column.Name.ToLower() == "id" && string.IsNullOrEmpty((string)colVal))
+                else if (column.KeyType != KeyType.NotAKey && string.IsNullOrEmpty((string)colVal))
                 {
                     var comb = SqlGenerator.Configuration.GetNextID();
                     column.PropertyInfo.SetValue(entity, comb, null);

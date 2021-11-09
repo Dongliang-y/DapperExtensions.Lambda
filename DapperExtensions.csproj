@@ -15,11 +15,13 @@
     <Company></Company>
     <Authors>Dongliang yi</Authors>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>3.0.0.24</AssemblyVersion>
+    <AssemblyVersion>3.0.0.25</AssemblyVersion>
     <SignAssembly>false</SignAssembly>
-    <FileVersion>3.0.0.24</FileVersion>
-    <Version>3.0.0.24-alpha</Version>
-    <PackageReleaseNotes>基于DapperExtensions 做了大量定制化开发,主要是为了更好的支持 拉姆达表达式，以及对.NET CORE 5的支持</PackageReleaseNotes>
+    <FileVersion>3.0.0.25</FileVersion>
+    <Version>3.0.0.25-alpha</Version>
+    <PackageReleaseNotes>基于DapperExtensions 做了大量定制化开发,主要是为了更好的支持 拉姆达表达式，以及对.NET CORE 5的支持
+2021-11-2 V3.0.0.25-alpha 更改原来通过Id字符识别主键的方式，改为通过 [key]特性识别。
+2021-11-2 V3.0.0.24-alpha 完善异步方法</PackageReleaseNotes>
     <RepositoryUrl>https://github.com/Dongliang-y/DapperExtensions.Lambda.git</RepositoryUrl>
     <PackageProjectUrl>https://github.com/Dongliang-y/DapperExtensions.Lambda</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>

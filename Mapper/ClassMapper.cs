@@ -5,11 +5,13 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.ComponentModel.DataAnnotations;
 
 namespace DapperExtensions.Mapper
 {
     public interface IClassMapper
     {
+        string KeyName { get; }
         string SchemaName { get; }
         string TableName { get; }
         IList<IPropertyMap> Properties { get; }
@@ -25,6 +27,7 @@ namespace DapperExtensions.Mapper
     /// </summary>
     public class ClassMapper<T> : IClassMapper<T> where T : class
     {
+        public string KeyName { get; protected set; }
         /// <summary>
         /// Gets or sets the schema to use when referring to the corresponding table name in the database.
         /// </summary>
@@ -102,20 +105,28 @@ namespace DapperExtensions.Mapper
                 PropertyMap map = Map(propertyInfo);
                 if (!hasDefinedKey)
                 {
-                    if (string.Equals(map.PropertyInfo.Name, "id", StringComparison.InvariantCultureIgnoreCase))
+                    // 通过对象字段成员上的 [Key]特性来决定主键。
+                    var keys = propertyInfo.GetCustomAttributes(typeof(KeyAttribute), true);
+                    if (keys.Length > 0)
                     {
                         keyMap = map;
                     }
 
-                    if (keyMap == null && map.PropertyInfo.Name.ToLower().EndsWith("id", true, CultureInfo.InvariantCulture))
-                    {
-                        keyMap = map;
-                    }
+                    //if (string.Equals(map.PropertyInfo.Name, "id", StringComparison.InvariantCultureIgnoreCase))
+                    //{
+                    //    keyMap = map;
+                    //}
+
+                    //if (keyMap == null && map.PropertyInfo.Name.ToLower().EndsWith("id", true, CultureInfo.InvariantCulture))
+                    //{
+                    //    keyMap = map;
+                    //}
                 }
             }
 
             if (keyMap != null)
             {
+                KeyName = keyMap.ColumnName;
                 keyMap.Key(PropertyTypeKeyTypeMapping.ContainsKey(keyMap.PropertyInfo.PropertyType)
                     ? PropertyTypeKeyTypeMapping[keyMap.PropertyInfo.PropertyType]
                     : KeyType.Assigned);
