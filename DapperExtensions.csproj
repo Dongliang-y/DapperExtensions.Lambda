@@ -20,6 +20,7 @@
     <FileVersion>3.0.0.25</FileVersion>
     <Version>3.0.0.26-alpha</Version>
     <PackageReleaseNotes>基于DapperExtensions 做了大量定制化开发,主要是为了更好的支持 拉姆达表达式，以及对.NET CORE 5的支持
+
 2021-11-9 V3.0.0.26-alpha 增加对连接查询的的辅助方法
 实体使用[ForeignKey]指定外键字段，通过QueryRelationalAsync 查询，使用func&lt;TMain,TRef1...&gt;委托处理外键导航字段。
 public class EntityTest
