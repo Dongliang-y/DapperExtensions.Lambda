@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using DapperExtensions.Mapper;
@@ -13,6 +14,10 @@ namespace DapperExtensions.Sql
         string Select(IClassMapper classMap, IPredicate predicate, IList<ISort> sort, IDictionary<string, object> parameters);
         string Select(IClassMapper classMap, IEnumerable<string> columNames, IPredicate predicate, IList<ISort> sort, IDictionary<string, object> parameters);
         string SelectPaged(IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int page, int resultsPerPage, IDictionary<string, object> parameters);
+        string SelectInnerJoin(IClassMapper classMap, Dictionary<string, IClassMapper> relationalClass, IPredicate predicate, IList<ISort> sort, IDictionary<string, object> parameters);
+        string SelectJoin(IClassMapper classMap, Dictionary<string, IClassMapper> relationalClass,string joinWord,IPredicate predicate, IList<ISort> sort, IDictionary<string, object> parameters);
+      
+        //string SelectPaged(IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int page, int resultsPerPage, IDictionary<string, object> parameters);
         string SelectSet(IClassMapper classMap, IPredicate predicate, IList<ISort> sort, int firstResult, int maxResults, IDictionary<string, object> parameters);
         string Count(IClassMapper classMap, IPredicate predicate, IDictionary<string, object> parameters);
         string Max(IClassMapper classMap, string attrName, IPredicate predicate, IDictionary<string, object> parameters);
@@ -451,5 +456,44 @@ namespace DapperExtensions.Sql
             return columns.AppendStrings();
         }
 
+        public string SelectInnerJoin(IClassMapper classMap, Dictionary<string, IClassMapper> relationalClass, IPredicate predicate, IList<ISort> sort, IDictionary<string, object> parameters)
+        {
+            return SelectJoin(classMap, relationalClass, "inner join", predicate, sort, parameters);
+        }
+
+        public string SelectJoin(IClassMapper classMap, Dictionary<string, IClassMapper> relationalClass,string joinWord, IPredicate predicate, IList<ISort> sort, IDictionary<string, object> parameters)
+        {
+
+            if (parameters == null)
+            {
+                throw new ArgumentNullException("Parameters");
+            }
+            var manName = this.GetTableName(classMap);
+            StringBuilder sql = new StringBuilder($"select * from {manName}");
+            
+            // 连接查询
+            foreach (var map in relationalClass)
+            {
+                var childTabName = GetTableName(map.Value);
+                var relColName = map.Key;
+                sql.Append($" {joinWord} {childTabName} on {manName}.{relColName}={childTabName}.{map.Value.KeyName}");
+             }
+
+            if (predicate != null)
+            {
+                sql.Append(" WHERE ")
+                    .Append(predicate.GetSql(this, parameters));
+            }
+
+            if (sort != null && sort.Any())
+            {
+                sql.Append(" ORDER BY ")
+                    .Append(sort.Select(s => GetColumnName(classMap, s.PropertyName, false) + (s.Ascending ? " ASC" : " DESC")).AppendStrings());
+            }
+
+            System.Console.WriteLine(sql.ToString());
+
+            return sql.ToString();
+        }
     }
 }

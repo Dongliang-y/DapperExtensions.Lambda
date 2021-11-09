@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Dynamic;
 using System.Linq;
@@ -55,6 +56,29 @@ namespace DapperExtensions
         Task<Tvalue> MinAsync<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class;
         Task<Tvalue> SumAsync<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class;
         Task<Tvalue> AVGAsync<Tvalue, T>(IDbConnection connection, string attrName, IDbTransaction transaction, object predicate, int? commandTimeout) where T : class;
+
+        /// <summary>
+        /// 多表关联查询，此查询会扫描Tmain的外键属性ForeignKey，执行关联查询，查询并映射关联属性。
+        /// </summary>
+        /// <typeparam name="TMain">主表类型</typeparam>
+        /// <typeparam name="TRel1">外键对象1</typeparam>
+        /// <typeparam name="TRel2">外键对象2</typeparam>
+        /// <typeparam name="TRel3">外键对象3</typeparam>
+        /// <typeparam name="TRel4">外键对象4</typeparam>
+        /// <typeparam name="TRel5">外键对象5</typeparam>
+        /// <param name="connection">数据库连接</param>
+        /// <param name="func">用于主表和子表对象组合的委托</param>
+        /// <param name="predicate">主表条件</param>
+        /// <param name="sort">主表排序</param>
+        /// <param name="transaction">事务</param>
+        /// <param name="buffered">是否使用缓存</param>
+        /// <param name="commandTimeout">连接超时时间</param>
+        /// <returns>IEnumerable`TMain</returns>
+        Task<IEnumerable<TMain>> QueryRelationalAsync<TMain, TRel1, TRel2, TRel3, TRel4, TRel5>(IDbConnection connection, Func<TMain, TRel1, TRel2, TRel3, TRel4, TRel5, TMain> func, object predicate, IList<ISort> sort, IDbTransaction transaction, bool buffered, int? commandTimeout) where TMain : class;
+        Task<IEnumerable<TMain>> QueryRelationalAsync<TMain, TRel1, TRel2, TRel3, TRel4>(IDbConnection connection, Func<TMain, TRel1, TRel2, TRel3, TRel4, TMain> func, object predicate, IList<ISort> sort, IDbTransaction transaction, bool buffered, int? commandTimeout) where TMain : class;
+        Task<IEnumerable<TMain>> QueryRelationalAsync<TMain, TRel1, TRel2, TRel3>(IDbConnection connection, Func<TMain, TRel1, TRel2, TRel3, TMain> func, object predicate, IList<ISort> sort, IDbTransaction transaction, bool buffered, int? commandTimeout) where TMain : class;
+        Task<IEnumerable<TMain>> QueryRelationalAsync<TMain, TRel1, TRel2>(IDbConnection connection, Func<TMain, TRel1, TRel2, TMain> func, object predicate, IList<ISort> sort, IDbTransaction transaction, bool buffered, int? commandTimeout) where TMain : class;
+        Task<IEnumerable<TMain>> QueryRelationalAsync<TMain, TRel1>(IDbConnection connection, Func<TMain, TRel1, TMain> func, object predicate, IList<ISort> sort, IDbTransaction transaction, bool buffered, int? commandTimeout) where TMain : class;
         #endregion
     }
 
@@ -947,6 +971,222 @@ namespace DapperExtensions
             return new SequenceReaderResultReader(items);
         }
 
+        /// <summary>
+        /// 多表关联查询，此查询会扫描Tmain的外键属性ForeignKey，执行关联查询，查询并映射关联属性。
+        /// </summary>
+        /// <typeparam name="TMain">主表类型</typeparam>
+        /// <param name="connection">数据库连接</param>
+        /// <param name="predicate">主表条件</param>
+        /// <param name="sort">主表排序</param>
+        /// <param name="transaction">事务</param>
+        /// <param name="buffered">是否使用缓存</param>
+        /// <param name="commandTimeout">连接超时时间</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<TMain>> QueryRelationalAsync<TMain,TRel1, TRel2, TRel3, TRel4, TRel5>(IDbConnection connection,Func<TMain, TRel1, TRel2, TRel3, TRel4, TRel5, TMain>func, object predicate, IList<ISort> sort, IDbTransaction transaction,bool buffered, int? commandTimeout)
+            where TMain : class
+        {
+            int relCount = 5;
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            IClassMapper classMap = SqlGenerator.Configuration.GetMap<TMain>();
+            IPredicate wherePredicate = GetPredicate(classMap, predicate);
+
+
+            var relationalClass = new Dictionary<string, IClassMapper>();
+
+            //            // 扫描主表的 外键属性
+            foreach (var pro in classMap.Properties)
+            {
+                var prop = pro.PropertyInfo;
+                var rst = prop.GetCustomAttributes(typeof(ForeignKeyAttribute), true);
+                if (rst.Length > 0)
+                {
+#if DEBUG
+                    // 外键字段
+                    var foreignKey = ((ForeignKeyAttribute)rst[0]).Name;
+                    // 外键字段指向的类型
+                    var dname = prop.DeclaringType.Name;
+
+                    // 属性类型
+                    //  var propType = prop.PropertyType.Name;
+                    Console.WriteLine($"{pro.Name}>foreignKey:{foreignKey}>DeclaringType{dname}");
+#endif
+                    if (!relationalClass.ContainsKey(foreignKey) && prop.DeclaringType != null)
+                    {
+                        relationalClass.Add(foreignKey, SqlGenerator.Configuration.GetMap(prop.DeclaringType));
+                    }
+                }
+            }
+
+
+
+            DynamicParameters dynamicParameters = new DynamicParameters();
+            foreach (var parameter in parameters)
+            {
+                dynamicParameters.Add(parameter.Key, parameter.Value);
+            }
+
+            string sql = SqlGenerator.SelectInnerJoin(classMap, relationalClass, wherePredicate, sort, parameters);
+
+            if (relationalClass.Count < relCount)
+            {
+                throw new ArgumentException($"{classMap.TableName} 没有设置{relationalClass.Count}个外键");
+            }
+
+            return await connection.QueryAsync( sql, func, dynamicParameters, transaction, buffered, "Id", commandTimeout, CommandType.Text);
+        }
+
+        public async Task<IEnumerable<TMain>> QueryRelationalAsync<TMain, TRel1, TRel2, TRel3, TRel4>(IDbConnection connection, Func<TMain, TRel1, TRel2, TRel3, TRel4, TMain> func, object predicate, IList<ISort> sort, IDbTransaction transaction, bool buffered, int? commandTimeout)
+            where TMain : class
+        {
+            int relCount = 4;
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            IClassMapper classMap = SqlGenerator.Configuration.GetMap<TMain>();
+            IPredicate wherePredicate = GetPredicate(classMap, predicate);
+            var relationalClass = new Dictionary<string, IClassMapper>();
+            // 扫描主表的 外键属性
+            foreach (var pro in classMap.Properties)
+            {
+                var prop = pro.PropertyInfo;
+                var rst = prop.GetCustomAttributes(typeof(ForeignKeyAttribute), true);
+                if (rst.Length > 0)
+                {
+                    // 外键字段
+                    var foreignKey = ((ForeignKeyAttribute)rst[0]).Name;
+                    if (!relationalClass.ContainsKey(foreignKey) && prop.DeclaringType != null)
+                    {
+                        relationalClass.Add(foreignKey, SqlGenerator.Configuration.GetMap(prop.DeclaringType));
+                    }
+                }
+            }
+            DynamicParameters dynamicParameters = new DynamicParameters();
+            foreach (var parameter in parameters)
+            {
+                dynamicParameters.Add(parameter.Key, parameter.Value);
+            }
+            string sql = SqlGenerator.SelectInnerJoin(classMap, relationalClass, wherePredicate, sort, parameters);
+
+            if (relationalClass.Count < relCount)
+            {
+                throw new ArgumentException($"{classMap.TableName} 没有设置{relationalClass.Count}个外键");
+            }
+            return await connection.QueryAsync(sql, func, dynamicParameters, transaction, buffered, "Id", commandTimeout, CommandType.Text);
+        }
+
+        public async Task<IEnumerable<TMain>> QueryRelationalAsync<TMain, TRel1, TRel2, TRel3>(IDbConnection connection, Func<TMain, TRel1, TRel2, TRel3, TMain> func, object predicate, IList<ISort> sort, IDbTransaction transaction, bool buffered, int? commandTimeout)
+            where TMain : class
+        {
+            int relCount = 3;
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            IClassMapper classMap = SqlGenerator.Configuration.GetMap<TMain>();
+            IPredicate wherePredicate = GetPredicate(classMap, predicate);
+            var relationalClass = new Dictionary<string, IClassMapper>();
+            // 扫描主表的 外键属性
+            foreach (var pro in classMap.Properties)
+            {
+                var prop = pro.PropertyInfo;
+                var rst = prop.GetCustomAttributes(typeof(ForeignKeyAttribute), true);
+                if (rst.Length > 0)
+                {
+                    // 外键字段
+                    var foreignKey = ((ForeignKeyAttribute)rst[0]).Name;
+                    if (!relationalClass.ContainsKey(foreignKey) && prop.DeclaringType != null)
+                    {
+                        relationalClass.Add(foreignKey, SqlGenerator.Configuration.GetMap(prop.DeclaringType));
+                    }
+                }
+            }
+            DynamicParameters dynamicParameters = new DynamicParameters();
+            foreach (var parameter in parameters)
+            {
+                dynamicParameters.Add(parameter.Key, parameter.Value);
+            }
+            string sql = SqlGenerator.SelectInnerJoin(classMap, relationalClass, wherePredicate, sort, parameters);
+
+            if (relationalClass.Count < relCount)
+            {
+                throw new ArgumentException($"{classMap.TableName} 没有设置{relationalClass.Count}个外键");
+            }
+            return await connection.QueryAsync(sql, func, dynamicParameters, transaction, buffered, "Id", commandTimeout, CommandType.Text);
+        }
+
+        public async Task<IEnumerable<TMain>> QueryRelationalAsync<TMain, TRel1, TRel2>(IDbConnection connection, Func<TMain, TRel1, TRel2, TMain> func, object predicate, IList<ISort> sort, IDbTransaction transaction, bool buffered, int? commandTimeout)
+            where TMain : class
+        {
+            int relCount = 2;
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            IClassMapper classMap = SqlGenerator.Configuration.GetMap<TMain>();
+            IPredicate wherePredicate = GetPredicate(classMap, predicate);
+            var relationalClass = new Dictionary<string, IClassMapper>();
+            // 扫描主表的 外键属性
+            foreach (var pro in classMap.Properties)
+            {
+                var prop = pro.PropertyInfo;
+                var rst = prop.GetCustomAttributes(typeof(ForeignKeyAttribute), true);
+                if (rst.Length > 0)
+                {
+                    // 外键字段
+                    var foreignKey = ((ForeignKeyAttribute)rst[0]).Name;
+                    if (!relationalClass.ContainsKey(foreignKey) && prop.DeclaringType != null)
+                    {
+                        relationalClass.Add(foreignKey, SqlGenerator.Configuration.GetMap(prop.DeclaringType));
+                    }
+                }
+            }
+            DynamicParameters dynamicParameters = new DynamicParameters();
+            foreach (var parameter in parameters)
+            {
+                dynamicParameters.Add(parameter.Key, parameter.Value);
+            }
+            string sql = SqlGenerator.SelectInnerJoin(classMap, relationalClass, wherePredicate, sort, parameters);
+
+            if (relationalClass.Count < relCount)
+            {
+                throw new ArgumentException($"{classMap.TableName} 没有设置{relationalClass.Count}个外键");
+            }
+            return await connection.QueryAsync(sql, func, dynamicParameters, transaction, buffered, "Id", commandTimeout, CommandType.Text);
+        }
+
+        public async Task<IEnumerable<TMain>> QueryRelationalAsync<TMain, TRel1>(IDbConnection connection, Func<TMain, TRel1,TMain> func, object predicate, IList<ISort> sort, IDbTransaction transaction, bool buffered, int? commandTimeout)
+            where TMain : class
+        {
+            int relCount = 1;
+
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            IClassMapper classMap = SqlGenerator.Configuration.GetMap<TMain>();
+            IPredicate wherePredicate = GetPredicate(classMap, predicate);
+            var relationalClass = new Dictionary<string, IClassMapper>();
+            // 扫描主表的 外键属性
+            foreach (var pro in classMap.Properties)
+            {
+                var prop = pro.PropertyInfo;
+                var rst = prop.GetCustomAttributes(typeof(ForeignKeyAttribute), true);
+                if (rst.Length > 0)
+                {
+                    // 外键字段
+                    var foreignKey = ((ForeignKeyAttribute)rst[0]).Name;
+                    if (!relationalClass.ContainsKey(foreignKey) && prop.DeclaringType != null)
+                    {
+                        relationalClass.Add(foreignKey, SqlGenerator.Configuration.GetMap(prop.DeclaringType));
+                    }
+                }
+            }
+            DynamicParameters dynamicParameters = new DynamicParameters();
+            foreach (var parameter in parameters)
+            {
+                dynamicParameters.Add(parameter.Key, parameter.Value);
+            }
+            string sql = SqlGenerator.SelectInnerJoin(classMap, relationalClass, wherePredicate, sort, parameters);
+
+            if (relationalClass.Count < relCount)
+            {
+                throw new ArgumentException($"{classMap.TableName} 没有设置{relationalClass.Count}个外键");
+            }
+            return await connection.QueryAsync(sql, func, dynamicParameters, transaction, buffered, "Id", commandTimeout, CommandType.Text);
+        }
         #endregion
     }
 }

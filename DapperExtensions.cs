@@ -132,7 +132,7 @@ namespace DapperExtensions
             Configure(new DapperExtensionsConfiguration(defaultMapper, mappingAssemblies, sqlDialect));
         }
 
-
+        #region 增删改
         /// <summary>
         /// Executes an insert query for the specified entity.
         /// </summary>
@@ -220,6 +220,8 @@ namespace DapperExtensions
             return await Instance.DeleteAsync<T>(connection, predicate, transaction, commandTimeout);
         }
 
+        #endregion
+
         #region Get
 
         /// <summary>
@@ -296,6 +298,44 @@ namespace DapperExtensions
         {
             return Instance.GetSet<T>(connection, predicate, sort, firstResult, maxResults, transaction, commandTimeout, buffered);
         }
+        /// <summary>
+        /// 多表关联查询，此查询会扫描Tmain的外键属性ForeignKey，执行关联查询，查询并映射关联属性。
+        /// </summary>
+        /// <typeparam name="TMain">主表类型</typeparam>
+        /// <typeparam name="TRel1">外键对象1</typeparam>
+        /// <typeparam name="TRel2">外键对象2</typeparam>
+        /// <typeparam name="TRel3">外键对象3</typeparam>
+        /// <typeparam name="TRel4">外键对象4</typeparam>
+        /// <typeparam name="TRel5">外键对象5</typeparam>
+        /// <param name="connection">数据库连接</param>
+        /// <param name="func">用于主表和子表对象组合的委托</param>
+        /// <param name="predicate">主表条件</param>
+        /// <param name="sort">主表排序</param>
+        /// <param name="transaction">事务</param>
+        /// <param name="buffered">是否使用缓存</param>
+        /// <param name="commandTimeout">连接超时时间</param>
+        /// <returns>IEnumerable`TMain</returns>
+        public static async Task<IEnumerable<TMain>> QueryRelationalAsync<TMain, TRel1, TRel2, TRel3, TRel4, TRel5>(IDbConnection connection, Func<TMain, TRel1, TRel2, TRel3, TRel4, TRel5, TMain> func, object predicate, IList<ISort> sort, IDbTransaction transaction=null, bool buffered=true, int? commandTimeout=180) where TMain : class
+        {
+            return await Instance.QueryRelationalAsync(connection, func, predicate, sort, transaction, buffered, commandTimeout);
+        }
+        public static async Task<IEnumerable<TMain>> QueryRelationalAsync<TMain, TRel1, TRel2, TRel3, TRel4>(IDbConnection connection, Func<TMain, TRel1, TRel2, TRel3, TRel4, TMain> func, object predicate, IList<ISort> sort, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = 180) where TMain : class
+        {
+            return await Instance.QueryRelationalAsync(connection, func, predicate, sort, transaction, buffered, commandTimeout);
+        }
+        public static async Task<IEnumerable<TMain>> QueryRelationalAsync<TMain, TRel1, TRel2, TRel3>(IDbConnection connection, Func<TMain, TRel1, TRel2, TRel3, TMain> func, object predicate, IList<ISort> sort, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = 180) where TMain : class
+        {
+            return await Instance.QueryRelationalAsync(connection, func, predicate, sort, transaction, buffered, commandTimeout);
+        }
+        public static async Task<IEnumerable<TMain>> QueryRelationalAsync<TMain, TRel1, TRel2>(IDbConnection connection, Func<TMain, TRel1, TRel2, TMain> func, object predicate, IList<ISort> sort, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = 180) where TMain : class
+        {
+            return await Instance.QueryRelationalAsync(connection, func, predicate, sort, transaction, buffered, commandTimeout);
+        }
+        public static async Task<IEnumerable<TMain>> QueryRelationalAsync<TMain, TRel1>(IDbConnection connection, Func<TMain, TRel1, TMain> func, object predicate, IList<ISort> sort, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = 180) where TMain : class
+        {
+            return await Instance.QueryRelationalAsync(connection, func, predicate, sort, transaction, buffered, commandTimeout);
+        }
+
         #endregion
 
         #region count max min sum avg
