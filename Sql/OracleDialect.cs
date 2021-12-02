@@ -68,7 +68,38 @@ namespace DapperExtensions.Sql
                 return string.Format("{0}{1}{2}", OpenQuote, value, CloseQuote);
             else return value;
         }
+        
+        public override string GetInsertsValue(string sql, IEnumerable<string> columnNames, int entitysCount)
+        {
+            // Oracle 批量Insert语句不支持跟VALUES
+            var index = sql.LastIndexOf("VALUES");
+            sql = sql.Substring(0, index);
 
+            StringBuilder strValues = new StringBuilder();
+            strValues.Append(sql);
+            for (var i = 0; i < entitysCount; i++)
+            {
+                strValues.Append(" SELECT ");
+
+                StringBuilder strTmp = new StringBuilder();
+                foreach (var colName in columnNames)
+                {
+                    strTmp.Append($"{ParameterPrefix}{colName}_{i},");
+                }
+
+                string tmp = strTmp.ToString().Substring(0, strTmp.Length - 1);
+                strValues.Append(tmp);
+
+                strValues.Append(" FROM dual");
+
+                if (i < entitysCount - 1)
+                {
+                    strValues.Append(" UNION ALL ");
+                }
+            }
+            return strValues.ToString();
+        }
+        
         public override char ParameterPrefix
         {
             get { return ':'; }
