@@ -129,7 +129,7 @@ namespace DapperExtensions
 
                         parameters.Add($"{SqlGenerator.Configuration.Dialect.ParameterPrefix}{column.Name}_{i}", comb);
                     }
-                    else
+                    else if (!column.Ignored)
                     {
                         var value = column.PropertyInfo.GetValue(e);
                         parameters.Add($"{SqlGenerator.Configuration.Dialect.ParameterPrefix}{column.Name}_{i}", value);
