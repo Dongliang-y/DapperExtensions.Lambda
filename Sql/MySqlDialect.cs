@@ -53,7 +53,7 @@ namespace DapperExtensions.Sql
             StringBuilder strUpdateColums = new StringBuilder();
             foreach (var col in columnNames)
             {
-                strUpdateColums.Append($"{col}=VALUES({col}),");
+                strUpdateColums.Append($"{QuoteString(col)}=VALUES({QuoteString(col)}),");
             }
             sqlBase += strUpdateColums.ToString().Substring(0, strUpdateColums.Length - 1);
             return sqlBase;
